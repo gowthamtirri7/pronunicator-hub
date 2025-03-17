@@ -4,6 +4,7 @@ import { getRandomQuestions } from '@/data/quizData';
 import QuizCard from '@/components/ui/QuizCard';
 import { ArrowDown, ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import { cn } from '@/lib/utils';
 
 const PronunciationQuiz: React.FC = () => {
   const [questions, setQuestions] = useState(getRandomQuestions(10));
@@ -87,15 +88,23 @@ const PronunciationQuiz: React.FC = () => {
                 <Progress value={progressPercentage} className="h-2" />
               </div>
               
-              {questions.map((question, index) => (
-                <QuizCard
-                  key={`${question.id}-${index}`}
-                  question={question}
-                  onSwipeLeft={handleSwipeLeft}
-                  onSwipeRight={handleSwipeRight}
-                  isActive={index === currentIndex}
-                />
-              ))}
+              <div className="relative w-full max-w-sm h-[300px]">
+                {questions.map((question, index) => {
+                  // Only render current card and next card (for performance)
+                  if (index < currentIndex || index > currentIndex + 1) return null;
+                  
+                  return (
+                    <QuizCard
+                      key={`${question.id}-${index}`}
+                      question={question}
+                      onSwipeLeft={handleSwipeLeft}
+                      onSwipeRight={handleSwipeRight}
+                      isActive={index === currentIndex}
+                      zIndex={questions.length - index}
+                    />
+                  );
+                })}
+              </div>
               
               <div className="absolute bottom-0 w-full max-w-sm flex justify-between items-center">
                 <div className="text-sm text-muted-foreground">
@@ -156,8 +165,3 @@ const PronunciationQuiz: React.FC = () => {
 };
 
 export default PronunciationQuiz;
-
-// Helper function for className conditionals
-function cn(...classes: any[]) {
-  return classes.filter(Boolean).join(' ');
-}

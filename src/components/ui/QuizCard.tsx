@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuizQuestion } from '@/data/quizData';
@@ -9,14 +9,17 @@ interface QuizCardProps {
   onSwipeLeft: () => void;
   onSwipeRight: () => void;
   isActive: boolean;
+  zIndex?: number;
 }
 
 const QuizCard: React.FC<QuizCardProps> = ({ 
   question, 
   onSwipeLeft, 
   onSwipeRight,
-  isActive
+  isActive,
+  zIndex = 10
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null);
   const [startX, setStartX] = useState(0);
   const [currentX, setCurrentX] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
@@ -24,10 +27,11 @@ const QuizCard: React.FC<QuizCardProps> = ({
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [animateOut, setAnimateOut] = useState<'left' | 'right' | null>(null);
+  const [interactionDisabled, setInteractionDisabled] = useState(false);
 
   // Handle swipe events
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!isActive) return;
+    if (!isActive || interactionDisabled) return;
     
     setIsDragging(true);
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
@@ -35,7 +39,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
   };
 
   const handleTouchMove = (e: React.TouchEvent | React.MouseEvent) => {
-    if (!isDragging || !isActive) return;
+    if (!isDragging || !isActive || interactionDisabled) return;
     
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     const diff = clientX - startX;
@@ -51,22 +55,22 @@ const QuizCard: React.FC<QuizCardProps> = ({
   };
 
   const handleTouchEnd = () => {
-    if (!isDragging || !isActive) return;
+    if (!isDragging || !isActive || interactionDisabled) return;
     
     setIsDragging(false);
     
     if (swipeDirection === 'left') {
-      handleSwipeLeft();
+      completeSwipeLeft();
     } else if (swipeDirection === 'right') {
-      handleSwipeRight();
-    }
-    
-    if (!swipeDirection) {
+      completeSwipeRight();
+    } else {
+      // Return to center if not a complete swipe
       setCurrentX(0);
     }
   };
 
-  const handleSwipeLeft = () => {
+  const completeSwipeLeft = () => {
+    setInteractionDisabled(true);
     setAnimateOut('left');
     const correctAnswer = question.hasR;
     setIsCorrect(correctAnswer);
@@ -78,10 +82,12 @@ const QuizCard: React.FC<QuizCardProps> = ({
       setAnimateOut(null);
       setCurrentX(0);
       setSwipeDirection(null);
+      setInteractionDisabled(false);
     }, 1500);
   };
 
-  const handleSwipeRight = () => {
+  const completeSwipeRight = () => {
+    setInteractionDisabled(true);
     setAnimateOut('right');
     const correctAnswer = question.hasL;
     setIsCorrect(correctAnswer);
@@ -93,19 +99,20 @@ const QuizCard: React.FC<QuizCardProps> = ({
       setAnimateOut(null);
       setCurrentX(0);
       setSwipeDirection(null);
+      setInteractionDisabled(false);
     }, 1500);
   };
 
   // Handle keyboard events
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (!isActive) return;
+    if (!isActive || interactionDisabled) return;
     
     if (e.key === 'ArrowLeft') {
-      handleSwipeLeft();
+      completeSwipeLeft();
     } else if (e.key === 'ArrowRight') {
-      handleSwipeRight();
+      completeSwipeRight();
     }
-  }, [isActive]);
+  }, [isActive, interactionDisabled, question]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -116,17 +123,20 @@ const QuizCard: React.FC<QuizCardProps> = ({
 
   // Handle custom swipe events
   useEffect(() => {
-    if (!isActive) return;
+    if (!isActive || !cardRef.current) return;
     
-    const card = document.querySelector('.quiz-card.swipe-action');
-    if (!card) return;
+    const card = cardRef.current;
     
     const handleCustomSwipeLeft = () => {
-      handleSwipeLeft();
+      if (!interactionDisabled) {
+        completeSwipeLeft();
+      }
     };
     
     const handleCustomSwipeRight = () => {
-      handleSwipeRight();
+      if (!interactionDisabled) {
+        completeSwipeRight();
+      }
     };
     
     card.addEventListener('swipeleft', handleCustomSwipeLeft);
@@ -136,35 +146,41 @@ const QuizCard: React.FC<QuizCardProps> = ({
       card.removeEventListener('swipeleft', handleCustomSwipeLeft);
       card.removeEventListener('swiperight', handleCustomSwipeRight);
     };
-  }, [isActive]);
+  }, [isActive, interactionDisabled, question]);
 
   // Style for the card based on swipe state
   const getCardStyle = () => {
+    const baseStyle = {
+      zIndex: isActive ? zIndex : zIndex - 1,
+      transform: 'translateX(0) rotate(0)',
+      opacity: 1,
+      transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+    };
+
     if (animateOut === 'left') {
       return {
+        ...baseStyle,
         transform: 'translateX(-150%) rotate(-10deg)',
         opacity: 0,
         transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
       };
     } else if (animateOut === 'right') {
       return {
+        ...baseStyle,
         transform: 'translateX(150%) rotate(10deg)',
         opacity: 0,
         transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
       };
     } else if (isDragging) {
       return {
+        ...baseStyle,
         transform: `translateX(${currentX}px) rotate(${currentX * 0.05}deg)`,
         opacity: 1 - Math.abs(currentX) / 500,
         transition: 'none'
       };
-    } else {
-      return {
-        transform: 'translateX(0) rotate(0)',
-        opacity: 1,
-        transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
-      };
-    }
+    } 
+    
+    return baseStyle;
   };
 
   const renderSwipeIndicator = () => {
@@ -217,18 +233,20 @@ const QuizCard: React.FC<QuizCardProps> = ({
 
   return (
     <div
+      ref={cardRef}
       className={cn(
-        "quiz-card relative w-full max-w-sm bg-white rounded-xl quiz-card-shadow p-8 select-none swipe-action",
-        !isActive && "pointer-events-none opacity-0 absolute"
+        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow p-8 select-none swipe-action",
+        !isActive && "pointer-events-none",
+        interactionDisabled && "pointer-events-none"
       )}
       style={getCardStyle()}
-      onTouchStart={handleTouchStart}
-      onTouchMove={handleTouchMove}
-      onTouchEnd={handleTouchEnd}
-      onMouseDown={handleTouchStart}
-      onMouseMove={handleTouchMove}
-      onMouseUp={handleTouchEnd}
-      onMouseLeave={handleTouchEnd}
+      onTouchStart={isActive ? handleTouchStart : undefined}
+      onTouchMove={isActive ? handleTouchMove : undefined}
+      onTouchEnd={isActive ? handleTouchEnd : undefined}
+      onMouseDown={isActive ? handleTouchStart : undefined}
+      onMouseMove={isActive ? handleTouchMove : undefined}
+      onMouseUp={isActive ? handleTouchEnd : undefined}
+      onMouseLeave={isActive ? handleTouchEnd : undefined}
     >
       {renderSwipeIndicator()}
       {renderFeedback()}

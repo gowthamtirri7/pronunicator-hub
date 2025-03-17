@@ -39,27 +39,8 @@ const Index: React.FC = () => {
     return () => document.removeEventListener('click', handleAnchorClick);
   }, []);
 
-  // Add keyboard control for the quiz
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const activeQuizCard = document.querySelector('.quiz-card.swipe-action:not(.pointer-events-none)');
-      
-      if (activeQuizCard) {
-        if (e.key === 'ArrowLeft') {
-          // Trigger swipe left
-          const event = new CustomEvent('swipeleft');
-          activeQuizCard.dispatchEvent(event);
-        } else if (e.key === 'ArrowRight') {
-          // Trigger swipe right
-          const event = new CustomEvent('swiperight');
-          activeQuizCard.dispatchEvent(event);
-        }
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  // We're removing the keyboard control here as it's now handled properly
+  // in the QuizCard component to prevent duplicate event handling
 
   return (
     <div className="min-h-screen bg-background font-sans">
