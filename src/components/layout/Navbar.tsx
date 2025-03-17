@@ -25,29 +25,38 @@ const Navbar: React.FC = () => {
       <nav 
         className={cn(
           "transition-all duration-300 ease-in-out py-5 px-6 md:px-10",
-          isScrolled ? "bg-white/80 bg-blur shadow-sm" : "bg-transparent"
+          isScrolled ? "bg-white/95 backdrop-blur-md shadow-sm" : "bg-black/40 backdrop-blur-sm"
         )}
       >
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <Logo className="z-50" />
+          <Logo className={cn("z-50", isScrolled ? "text-foreground" : "text-white")} />
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-12">
             <a 
               href="#about" 
-              className="text-sm font-medium tracking-wide hover:text-primary transition-colors"
+              className={cn(
+                "text-sm font-medium tracking-wide transition-colors",
+                isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+              )}
             >
               About
             </a>
             <a 
               href="#book" 
-              className="text-sm font-medium tracking-wide hover:text-primary transition-colors"
+              className={cn(
+                "text-sm font-medium tracking-wide transition-colors",
+                isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+              )}
             >
               Book
             </a>
             <a 
               href="#quiz" 
-              className="text-sm font-medium tracking-wide hover:text-primary transition-colors"
+              className={cn(
+                "text-sm font-medium tracking-wide transition-colors",
+                isScrolled ? "text-foreground hover:text-primary" : "text-white/90 hover:text-white"
+              )}
             >
               Quiz
             </a>
@@ -61,7 +70,10 @@ const Navbar: React.FC = () => {
           
           {/* Mobile Menu Button */}
           <button 
-            className="md:hidden z-50 flex items-center text-gray-900"
+            className={cn(
+              "md:hidden z-50 flex items-center",
+              isScrolled ? "text-gray-900" : "text-white"
+            )}
             onClick={toggleMenu}
             aria-label="Toggle menu"
           >

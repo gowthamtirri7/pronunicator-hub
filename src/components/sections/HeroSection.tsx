@@ -9,7 +9,7 @@ const HeroSection: React.FC = () => {
         videoSrc="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4"
         overlayClassName="bg-gradient-to-b from-black/60 via-black/40 to-black/80"
       >
-        <div className="flex flex-col items-center justify-center h-full w-full px-6 md:px-10">
+        <div className="flex flex-col items-center justify-center h-full w-full px-6 md:px-10 pt-20">
           <div className="max-w-4xl mx-auto text-center">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6 tracking-tight leading-none">
               Perfect Your <span className="text-primary">Pronunciation</span>

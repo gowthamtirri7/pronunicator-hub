@@ -9,7 +9,7 @@ import PronunciationQuiz from '@/components/sections/PronunciationQuiz';
 import Footer from '@/components/layout/Footer';
 
 const Index: React.FC = () => {
-  // Smooth scroll functionality
+  // Smooth scroll functionality with improved offset calculation
   useEffect(() => {
     const handleAnchorClick = (e: MouseEvent) => {
       const target = e.target as HTMLElement;
@@ -20,10 +20,17 @@ const Index: React.FC = () => {
         const targetElement = document.querySelector(anchor.hash);
         
         if (targetElement) {
+          // Calculate header height dynamically
+          const header = document.querySelector('header');
+          const headerHeight = header ? header.offsetHeight : 80;
+          
           window.scrollTo({
-            top: targetElement.getBoundingClientRect().top + window.scrollY - 100,
+            top: targetElement.getBoundingClientRect().top + window.scrollY - headerHeight - 20,
             behavior: 'smooth'
           });
+          
+          // Update URL without scrolling
+          window.history.pushState(null, '', anchor.hash);
         }
       }
     };

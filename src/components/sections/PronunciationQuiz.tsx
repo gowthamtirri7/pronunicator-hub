@@ -3,15 +3,26 @@ import React, { useState, useEffect } from 'react';
 import { getRandomQuestions } from '@/data/quizData';
 import QuizCard from '@/components/ui/QuizCard';
 import { ArrowDown, ArrowLeft, ArrowRight, RotateCcw } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 const PronunciationQuiz: React.FC = () => {
   const [questions, setQuestions] = useState(getRandomQuestions(10));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [score, setScore] = useState(0);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    if (currentIndex >= questions.length) {
+    // Add a slight delay to ensure smooth transitions
+    const timer = setTimeout(() => {
+      setIsLoaded(true);
+    }, 300);
+    
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    if (currentIndex >= questions.length && questions.length > 0) {
       setCompleted(true);
     }
   }, [currentIndex, questions.length]);
@@ -37,12 +48,22 @@ const PronunciationQuiz: React.FC = () => {
     setCurrentIndex(0);
     setCompleted(false);
     setScore(0);
+    setIsLoaded(false);
+    
+    // Add a slight delay to ensure smooth transitions
+    setTimeout(() => {
+      setIsLoaded(true);
+    }, 300);
   };
+
+  const progressPercentage = questions.length > 0 
+    ? (currentIndex / questions.length) * 100 
+    : 0;
 
   return (
     <section id="quiz" className="py-20 md:py-28 px-6 md:px-10 bg-gradient-to-b from-white to-secondary/30">
       <div className="max-w-7xl mx-auto">
-        <div className="text-center mb-16">
+        <div className="text-center mb-12">
           <span className="inline-block text-sm font-medium text-primary px-3 py-1 bg-primary/10 rounded-full mb-4">
             Test Your Skills
           </span>
@@ -54,9 +75,18 @@ const PronunciationQuiz: React.FC = () => {
           </p>
         </div>
         
-        <div className="h-[450px] relative flex flex-col items-center justify-center">
+        <div className="h-[500px] relative flex flex-col items-center justify-center">
           {!completed ? (
             <>
+              <div 
+                className={cn(
+                  "w-full max-w-sm mb-10 transition-opacity duration-500",
+                  isLoaded ? "opacity-100" : "opacity-0"
+                )}
+              >
+                <Progress value={progressPercentage} className="h-2" />
+              </div>
+              
               {questions.map((question, index) => (
                 <QuizCard
                   key={`${question.id}-${index}`}
@@ -77,7 +107,7 @@ const PronunciationQuiz: React.FC = () => {
               </div>
             </>
           ) : (
-            <div className="bg-white rounded-xl p-10 max-w-sm w-full quiz-card-shadow text-center">
+            <div className="bg-white rounded-xl p-10 max-w-sm w-full quiz-card-shadow text-center animate-fade-in">
               <div className="mb-6">
                 <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto">
                   <ArrowDown size={24} className="text-primary" />
@@ -86,6 +116,15 @@ const PronunciationQuiz: React.FC = () => {
               <h3 className="text-2xl font-bold mb-4">Quiz Complete!</h3>
               <p className="text-muted-foreground mb-6">
                 You scored {score} out of {questions.length}
+                {score >= questions.length * 0.8 && (
+                  <span className="block mt-2 text-green-500 font-medium">Great job!</span>
+                )}
+                {score >= questions.length * 0.5 && score < questions.length * 0.8 && (
+                  <span className="block mt-2 text-amber-500 font-medium">Good effort!</span>
+                )}
+                {score < questions.length * 0.5 && (
+                  <span className="block mt-2 text-blue-500 font-medium">Keep practicing!</span>
+                )}
               </p>
               <button
                 onClick={resetQuiz}
@@ -99,7 +138,17 @@ const PronunciationQuiz: React.FC = () => {
         </div>
         
         <div className="mt-12 text-center text-muted-foreground text-sm max-w-md mx-auto">
-          <p>Use keyboard arrows for desktop: <ArrowLeft className="inline-block h-4 w-4 mx-1" /> for "R" and <ArrowRight className="inline-block h-4 w-4 mx-1" /> for "L"</p>
+          <p className="flex items-center justify-center gap-2">
+            Use keyboard arrows for desktop: 
+            <span className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md">
+              <ArrowLeft className="h-4 w-4" />
+              <span>for "R"</span>
+            </span> 
+            <span className="flex items-center gap-1 px-2 py-1 bg-secondary rounded-md">
+              <span>for "L"</span>
+              <ArrowRight className="h-4 w-4" />
+            </span>
+          </p>
         </div>
       </div>
     </section>
@@ -107,3 +156,8 @@ const PronunciationQuiz: React.FC = () => {
 };
 
 export default PronunciationQuiz;
+
+// Helper function for className conditionals
+function cn(...classes: any[]) {
+  return classes.filter(Boolean).join(' ');
+}

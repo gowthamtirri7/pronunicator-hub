@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuizQuestion } from '@/data/quizData';
@@ -23,7 +23,9 @@ const QuizCard: React.FC<QuizCardProps> = ({
   const [isDragging, setIsDragging] = useState(false);
   const [showFeedback, setShowFeedback] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [animateOut, setAnimateOut] = useState<'left' | 'right' | null>(null);
 
+  // Handle swipe events
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isActive) return;
     
@@ -59,22 +61,28 @@ const QuizCard: React.FC<QuizCardProps> = ({
       handleSwipeRight();
     }
     
-    setCurrentX(0);
-    setSwipeDirection(null);
+    if (!swipeDirection) {
+      setCurrentX(0);
+    }
   };
 
   const handleSwipeLeft = () => {
-    const correctAnswer = !question.hasL;
+    setAnimateOut('left');
+    const correctAnswer = question.hasR;
     setIsCorrect(correctAnswer);
     setShowFeedback(true);
     
     setTimeout(() => {
       onSwipeLeft();
       setShowFeedback(false);
+      setAnimateOut(null);
+      setCurrentX(0);
+      setSwipeDirection(null);
     }, 1500);
   };
 
   const handleSwipeRight = () => {
+    setAnimateOut('right');
     const correctAnswer = question.hasL;
     setIsCorrect(correctAnswer);
     setShowFeedback(true);
@@ -82,27 +90,98 @@ const QuizCard: React.FC<QuizCardProps> = ({
     setTimeout(() => {
       onSwipeRight();
       setShowFeedback(false);
+      setAnimateOut(null);
+      setCurrentX(0);
+      setSwipeDirection(null);
     }, 1500);
   };
 
-  const cardStyle = {
-    transform: isDragging ? `translateX(${currentX}px) rotate(${currentX * 0.05}deg)` : 'translateX(0) rotate(0)',
-    opacity: isDragging ? 1 - Math.abs(currentX) / 500 : 1
+  // Handle keyboard events
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (!isActive) return;
+    
+    if (e.key === 'ArrowLeft') {
+      handleSwipeLeft();
+    } else if (e.key === 'ArrowRight') {
+      handleSwipeRight();
+    }
+  }, [isActive]);
+
+  useEffect(() => {
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handleKeyDown]);
+
+  // Handle custom swipe events
+  useEffect(() => {
+    if (!isActive) return;
+    
+    const card = document.querySelector('.quiz-card.swipe-action');
+    if (!card) return;
+    
+    const handleCustomSwipeLeft = () => {
+      handleSwipeLeft();
+    };
+    
+    const handleCustomSwipeRight = () => {
+      handleSwipeRight();
+    };
+    
+    card.addEventListener('swipeleft', handleCustomSwipeLeft);
+    card.addEventListener('swiperight', handleCustomSwipeRight);
+    
+    return () => {
+      card.removeEventListener('swipeleft', handleCustomSwipeLeft);
+      card.removeEventListener('swiperight', handleCustomSwipeRight);
+    };
+  }, [isActive]);
+
+  // Style for the card based on swipe state
+  const getCardStyle = () => {
+    if (animateOut === 'left') {
+      return {
+        transform: 'translateX(-150%) rotate(-10deg)',
+        opacity: 0,
+        transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
+      };
+    } else if (animateOut === 'right') {
+      return {
+        transform: 'translateX(150%) rotate(10deg)',
+        opacity: 0,
+        transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
+      };
+    } else if (isDragging) {
+      return {
+        transform: `translateX(${currentX}px) rotate(${currentX * 0.05}deg)`,
+        opacity: 1 - Math.abs(currentX) / 500,
+        transition: 'none'
+      };
+    } else {
+      return {
+        transform: 'translateX(0) rotate(0)',
+        opacity: 1,
+        transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+      };
+    }
   };
 
   const renderSwipeIndicator = () => {
-    if (!swipeDirection) return null;
+    if (!swipeDirection && !animateOut) return null;
+    
+    const direction = animateOut || swipeDirection;
     
     return (
       <div 
         className={cn(
-          "absolute top-6 p-3 rounded-full",
-          swipeDirection === 'left' ? "left-6 bg-destructive" : "right-6 bg-green-500",
+          "absolute top-6 p-3 rounded-full z-30",
+          direction === 'left' ? "left-6 bg-destructive/90" : "right-6 bg-green-500/90",
           "transition-opacity duration-200",
-          isDragging ? "opacity-100" : "opacity-0"
+          (isDragging || animateOut) ? "opacity-100" : "opacity-0"
         )}
       >
-        {swipeDirection === 'left' ? <ArrowLeft className="text-white" /> : <ArrowRight className="text-white" />}
+        {direction === 'left' ? <ArrowLeft className="text-white" /> : <ArrowRight className="text-white" />}
       </div>
     );
   };
@@ -112,7 +191,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     
     return (
       <div className={cn(
-        "absolute inset-0 flex items-center justify-center bg-white/90 z-20 rounded-xl animate-fade-in",
+        "absolute inset-0 flex items-center justify-center bg-white/95 z-20 rounded-xl animate-fade-in",
         isCorrect ? "bg-green-50" : "bg-red-50"
       )}>
         <div className="text-center p-6">
@@ -142,7 +221,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
         "quiz-card relative w-full max-w-sm bg-white rounded-xl quiz-card-shadow p-8 select-none swipe-action",
         !isActive && "pointer-events-none opacity-0 absolute"
       )}
-      style={cardStyle}
+      style={getCardStyle()}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
