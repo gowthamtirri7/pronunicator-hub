@@ -69,7 +69,9 @@ const QuizCard: React.FC<QuizCardProps> = ({
     }
   };
 
-  const completeSwipeLeft = () => {
+  const completeSwipeLeft = useCallback(() => {
+    if (interactionDisabled) return;
+    
     setInteractionDisabled(true);
     setAnimateOut('left');
     const correctAnswer = question.hasR;
@@ -84,9 +86,11 @@ const QuizCard: React.FC<QuizCardProps> = ({
       setSwipeDirection(null);
       setInteractionDisabled(false);
     }, 1500);
-  };
+  }, [interactionDisabled, question.hasR, onSwipeLeft]);
 
-  const completeSwipeRight = () => {
+  const completeSwipeRight = useCallback(() => {
+    if (interactionDisabled) return;
+    
     setInteractionDisabled(true);
     setAnimateOut('right');
     const correctAnswer = question.hasL;
@@ -101,52 +105,30 @@ const QuizCard: React.FC<QuizCardProps> = ({
       setSwipeDirection(null);
       setInteractionDisabled(false);
     }, 1500);
-  };
+  }, [interactionDisabled, question.hasL, onSwipeRight]);
 
-  // Handle keyboard events
+  // Handle keyboard events - only for active card
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isActive || interactionDisabled) return;
     
     if (e.key === 'ArrowLeft') {
+      e.preventDefault(); // Prevent scrolling
       completeSwipeLeft();
     } else if (e.key === 'ArrowRight') {
+      e.preventDefault(); // Prevent scrolling
       completeSwipeRight();
     }
-  }, [isActive, interactionDisabled, question]);
+  }, [isActive, interactionDisabled, completeSwipeLeft, completeSwipeRight]);
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown);
+    if (isActive) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleKeyDown]);
-
-  // Handle custom swipe events
-  useEffect(() => {
-    if (!isActive || !cardRef.current) return;
-    
-    const card = cardRef.current;
-    
-    const handleCustomSwipeLeft = () => {
-      if (!interactionDisabled) {
-        completeSwipeLeft();
-      }
-    };
-    
-    const handleCustomSwipeRight = () => {
-      if (!interactionDisabled) {
-        completeSwipeRight();
-      }
-    };
-    
-    card.addEventListener('swipeleft', handleCustomSwipeLeft);
-    card.addEventListener('swiperight', handleCustomSwipeRight);
-    
-    return () => {
-      card.removeEventListener('swipeleft', handleCustomSwipeLeft);
-      card.removeEventListener('swiperight', handleCustomSwipeRight);
-    };
-  }, [isActive, interactionDisabled, question]);
+  }, [isActive, handleKeyDown]);
 
   // Style for the card based on swipe state
   const getCardStyle = () => {

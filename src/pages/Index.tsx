@@ -39,9 +39,6 @@ const Index: React.FC = () => {
     return () => document.removeEventListener('click', handleAnchorClick);
   }, []);
 
-  // We're removing the keyboard control here as it's now handled properly
-  // in the QuizCard component to prevent duplicate event handling
-
   return (
     <div className="min-h-screen bg-background font-sans">
       <Navbar />
