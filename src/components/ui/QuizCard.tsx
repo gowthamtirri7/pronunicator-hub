@@ -3,6 +3,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuizQuestion } from '@/data/quizData';
+import { Button } from '@/components/ui/button';
 
 interface QuizCardProps {
   question: QuizQuestion;
@@ -213,6 +214,37 @@ const QuizCard: React.FC<QuizCardProps> = ({
     );
   };
 
+  // Render swipe buttons
+  const renderSwipeButtons = () => {
+    if (!isActive || interactionDisabled) return null;
+
+    return (
+      <>
+        {/* Left swipe button ("R" sound) */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full h-12 w-12 bg-white/90 shadow-md hover:bg-destructive/20 z-20"
+          onClick={completeSwipeLeft}
+          disabled={interactionDisabled}
+        >
+          <ArrowLeft className="h-5 w-5" />
+        </Button>
+
+        {/* Right swipe button ("L" sound) */}
+        <Button
+          variant="outline"
+          size="icon"
+          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full h-12 w-12 bg-white/90 shadow-md hover:bg-green-500/20 z-20"
+          onClick={completeSwipeRight}
+          disabled={interactionDisabled}
+        >
+          <ArrowRight className="h-5 w-5" />
+        </Button>
+      </>
+    );
+  };
+
   return (
     <div
       ref={cardRef}
@@ -232,6 +264,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     >
       {renderSwipeIndicator()}
       {renderFeedback()}
+      {renderSwipeButtons()}
       
       <div className="relative z-10">
         <div className="mb-8 text-center">
