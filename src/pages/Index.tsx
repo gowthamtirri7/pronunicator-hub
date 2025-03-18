@@ -1,11 +1,9 @@
-
 import React, { useEffect } from 'react';
 import Navbar from '@/components/layout/Navbar';
 import HeroSection from '@/components/sections/HeroSection';
 import AboutSection from '@/components/sections/AboutSection';
 import BookSection from '@/components/sections/BookSection';
 import EmailSignup from '@/components/sections/EmailSignup';
-import PronunciationQuiz from '@/components/sections/PronunciationQuiz';
 import Footer from '@/components/layout/Footer';
 
 const Index: React.FC = () => {
@@ -45,7 +43,6 @@ const Index: React.FC = () => {
       <HeroSection />
       <AboutSection />
       <BookSection />
-      <PronunciationQuiz />
       <EmailSignup />
       <Footer />
     </div>

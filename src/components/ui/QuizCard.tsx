@@ -5,6 +5,14 @@ import type { QuizQuestion } from '@/data/quizData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
+const placeholderImages = [
+  'photo-1649972904349-6e44c42644a7',
+  'photo-1488590528505-98d2b5aba04b',
+  'photo-1518770660439-4636190af475',
+  'photo-1461749280684-dccba630e2f6',
+  'photo-1486312338219-ce68d2c6f44d',
+];
+
 interface QuizCardProps {
   question: QuizQuestion;
   onSwipeLeft: () => void;
@@ -32,14 +40,25 @@ const QuizCard: React.FC<QuizCardProps> = ({
 
   const { toast } = useToast();
 
-  // Audio playback
-  const handlePlayAudio = () => {
-    // TODO: Implement audio playback when audio URLs are added to questions
-    toast({
-      title: "Coming Soon",
-      description: "Audio playback will be available soon!",
-    });
-  };
+  const [randomImage] = useState(() => {
+    const randomIndex = Math.floor(Math.random() * placeholderImages.length);
+    return `https://images.unsplash.com/${placeholderImages[randomIndex]}?auto=format&fit=crop&w=800&q=80`;
+  });
+
+  const handlePlayAudio = useCallback(() => {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(question.word);
+      utterance.rate = 0.8; // Slightly slower for clarity
+      utterance.pitch = 1;
+      window.speechSynthesis.speak(utterance);
+    } else {
+      toast({
+        title: "Error",
+        description: "Text-to-speech is not supported in your browser",
+        variant: "destructive"
+      });
+    }
+  }, [question.word, toast]);
 
   // Handle swipe events
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
@@ -208,51 +227,22 @@ const QuizCard: React.FC<QuizCardProps> = ({
           <div className="mb-4">
             {isCorrect ? (
               <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-                <Check size={30} className="text-green-600" />
+                <Check className="h-8 w-8 text-green-600" />
               </div>
             ) : (
               <div className="mx-auto w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
-                <X size={30} className="text-red-600" />
+                <X className="h-8 w-8 text-red-600" />
               </div>
             )}
           </div>
           <h3 className="text-xl font-medium mb-2">
             {isCorrect ? "Correct!" : "Not quite!"}
           </h3>
-          <p className="text-sm text-muted-foreground">{question.explanation}</p>
+          <p className="text-sm text-muted-foreground">
+            {question.word} {question.explanation}
+          </p>
         </div>
       </div>
-    );
-  };
-
-  // Render swipe buttons
-  const renderSwipeButtons = () => {
-    if (!isActive || interactionDisabled) return null;
-
-    return (
-      <>
-        {/* Left swipe button ("R" sound) */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full h-12 w-12 bg-white/90 shadow-md hover:bg-destructive/20 z-20"
-          onClick={completeSwipeLeft}
-          disabled={interactionDisabled}
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Button>
-
-        {/* Right swipe button ("L" sound) */}
-        <Button
-          variant="outline"
-          size="icon"
-          className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full h-12 w-12 bg-white/90 shadow-md hover:bg-green-500/20 z-20"
-          onClick={completeSwipeRight}
-          disabled={interactionDisabled}
-        >
-          <ArrowRight className="h-5 w-5" />
-        </Button>
-      </>
     );
   };
 
@@ -260,9 +250,8 @@ const QuizCard: React.FC<QuizCardProps> = ({
     <div
       ref={cardRef}
       className={cn(
-        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none swipe-action",
-        !isActive && "pointer-events-none",
-        interactionDisabled && "pointer-events-none"
+        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none",
+        !isActive && "pointer-events-none"
       )}
       style={getCardStyle()}
       onTouchStart={isActive ? handleTouchStart : undefined}
@@ -275,18 +264,16 @@ const QuizCard: React.FC<QuizCardProps> = ({
     >
       {renderSwipeIndicator()}
       {renderFeedback()}
-      {renderSwipeButtons()}
       
       <div className="relative z-10 p-8">
         <div className="mb-8 text-center">
           <span className="inline-block text-xs font-medium text-muted-foreground px-3 py-1 bg-secondary rounded-full mb-4">
-            Swipe left for "L" — Swipe right for "R"
+            Swipe or use arrow keys: Left for "R" — Right for "L"
           </span>
           
-          {/* Image placeholder */}
           <div className="relative w-full aspect-video mb-6 rounded-lg bg-muted overflow-hidden">
             <img 
-              src="/placeholder.svg"
+              src={randomImage}
               alt={question.word}
               className="w-full h-full object-cover"
             />
@@ -307,17 +294,36 @@ const QuizCard: React.FC<QuizCardProps> = ({
           </div>
         </div>
         
-        <div className="flex items-center justify-between mt-10 text-xs text-muted-foreground">
+        <div className="flex items-center justify-between mt-10 text-xs">
           <div className="flex items-center gap-2">
             <ArrowLeft size={16} />
-            <span className="text-blue-500 font-medium">Has "L" sound</span>
+            <span className="font-medium text-blue-500">Has "L" sound</span>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-destructive font-medium">Has "R" sound</span>
+            <span className="font-medium text-destructive">Has "R" sound</span>
             <ArrowRight size={16} />
           </div>
         </div>
       </div>
+
+      {/* Swipe buttons */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1/2 rounded-full h-12 w-12 bg-white/90 shadow-md hover:bg-blue-500/20 z-20"
+        onClick={completeSwipeLeft}
+      >
+        <ArrowLeft className="h-5 w-5" />
+      </Button>
+
+      <Button
+        variant="outline"
+        size="icon"
+        className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1/2 rounded-full h-12 w-12 bg-white/90 shadow-md hover:bg-destructive/20 z-20"
+        onClick={completeSwipeRight}
+      >
+        <ArrowRight className="h-5 w-5" />
+      </Button>
     </div>
   );
 };
