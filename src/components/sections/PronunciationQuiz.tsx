@@ -68,9 +68,8 @@ const PronunciationQuiz: React.FC = () => {
                     currentQuestion.hasL ? 'L' : 'R'
     }]);
 
-    setTimeout(() => {
       setCurrentIndex(prev => prev + 1);
-    }, 1500);
+   
   };
 
   const resetQuiz = () => {
