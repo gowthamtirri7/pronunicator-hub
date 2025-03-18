@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Check, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -61,7 +60,6 @@ const QuizCard: React.FC<QuizCardProps> = ({
     }
   }, [question.word, toast]);
 
-  // Handle swipe events
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isActive || interactionDisabled) return;
     
@@ -96,7 +94,6 @@ const QuizCard: React.FC<QuizCardProps> = ({
     } else if (swipeDirection === 'right') {
       completeSwipeRight();
     } else {
-      // Return to center if not a complete swipe
       setCurrentX(0);
     }
   };
@@ -139,15 +136,14 @@ const QuizCard: React.FC<QuizCardProps> = ({
     }, 1500);
   }, [interactionDisabled, question.hasR, onSwipeRight]);
 
-  // Handle keyboard events - only for active card
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (!isActive || interactionDisabled) return;
     
     if (e.key === 'ArrowLeft') {
-      e.preventDefault(); // Prevent scrolling
+      e.preventDefault();
       completeSwipeLeft();
     } else if (e.key === 'ArrowRight') {
-      e.preventDefault(); // Prevent scrolling
+      e.preventDefault();
       completeSwipeRight();
     }
   }, [isActive, interactionDisabled, completeSwipeLeft, completeSwipeRight]);
@@ -162,26 +158,26 @@ const QuizCard: React.FC<QuizCardProps> = ({
     };
   }, [isActive, handleKeyDown]);
 
-  // Style for the card based on swipe state
   const getCardStyle = () => {
     const baseStyle = {
       zIndex: isActive ? zIndex : zIndex - 1,
       transform: 'translateX(0) rotate(0)',
       opacity: 1,
-      transition: 'transform 0.3s ease-out, opacity 0.3s ease-out'
+      transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
+      pointerEvents: isActive ? 'auto' : 'none'
     };
 
     if (animateOut === 'left') {
       return {
         ...baseStyle,
-        transform: 'translateX(-150%) rotate(-10deg)',
+        transform: 'translateX(-200%) rotate(-20deg)',
         opacity: 0,
         transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
       };
     } else if (animateOut === 'right') {
       return {
         ...baseStyle,
-        transform: 'translateX(150%) rotate(10deg)',
+        transform: 'translateX(200%) rotate(20deg)',
         opacity: 0,
         transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
       };
@@ -255,10 +251,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className={cn(
-        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none",
-        !isActive && "pointer-events-none"
-      )}
+      className="quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none"
       style={getCardStyle()}
       onTouchStart={isActive ? handleTouchStart : undefined}
       onTouchMove={isActive ? handleTouchMove : undefined}
@@ -274,7 +267,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
       <div className="relative z-10 p-8">
         <div className="mb-8 text-center">
           <span className="inline-block text-xs font-medium text-muted-foreground px-3 py-1 bg-secondary rounded-full mb-4">
-            Swipe or use arrow keys: Left for "R" — Right for "L"
+            Swipe or use arrow keys to answer
           </span>
           
           <div className="relative w-full aspect-video mb-6 rounded-lg bg-muted overflow-hidden">
@@ -299,20 +292,8 @@ const QuizCard: React.FC<QuizCardProps> = ({
             </Button>
           </div>
         </div>
-        
-        <div className="flex items-center justify-between mt-10 text-xs">
-          <div className="flex items-center gap-2">
-            <ArrowLeft size={16} />
-            <span className="font-medium text-blue-500">Has "L" sound</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-destructive">Has "R" sound</span>
-            <ArrowRight size={16} />
-          </div>
-        </div>
       </div>
 
-      {/* Swipe buttons */}
       <Button
         variant="outline"
         size="icon"
