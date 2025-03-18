@@ -158,13 +158,13 @@ const QuizCard: React.FC<QuizCardProps> = ({
     };
   }, [isActive, handleKeyDown]);
 
-  const getCardStyle = () => {
-    const baseStyle = {
+  const getCardStyle = (): React.CSSProperties => {
+    const baseStyle: React.CSSProperties = {
       zIndex: isActive ? zIndex : zIndex - 1,
       transform: 'translateX(0) rotate(0)',
       opacity: 1,
       transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-      pointerEvents: isActive ? 'auto' : 'none'
+      pointerEvents: isActive ? 'auto' : 'none' as const
     };
 
     if (animateOut === 'left') {
@@ -172,14 +172,16 @@ const QuizCard: React.FC<QuizCardProps> = ({
         ...baseStyle,
         transform: 'translateX(-200%) rotate(-20deg)',
         opacity: 0,
-        transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
+        transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
+        pointerEvents: 'none' as const
       };
     } else if (animateOut === 'right') {
       return {
         ...baseStyle,
         transform: 'translateX(200%) rotate(20deg)',
         opacity: 0,
-        transition: 'transform 0.5s ease-out, opacity 0.5s ease-out'
+        transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
+        pointerEvents: 'none' as const
       };
     } else if (isDragging) {
       return {
@@ -251,7 +253,10 @@ const QuizCard: React.FC<QuizCardProps> = ({
   return (
     <div
       ref={cardRef}
-      className="quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none"
+      className={cn(
+        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none",
+        !isActive && "pointer-events-none"
+      )}
       style={getCardStyle()}
       onTouchStart={isActive ? handleTouchStart : undefined}
       onTouchMove={isActive ? handleTouchMove : undefined}
@@ -316,3 +321,4 @@ const QuizCard: React.FC<QuizCardProps> = ({
 };
 
 export default QuizCard;
+
