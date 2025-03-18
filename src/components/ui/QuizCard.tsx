@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Check, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { QuizQuestion } from '@/data/quizData';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 interface QuizCardProps {
   question: QuizQuestion;
@@ -29,6 +29,17 @@ const QuizCard: React.FC<QuizCardProps> = ({
   const [isCorrect, setIsCorrect] = useState(false);
   const [animateOut, setAnimateOut] = useState<'left' | 'right' | null>(null);
   const [interactionDisabled, setInteractionDisabled] = useState(false);
+
+  const { toast } = useToast();
+
+  // Audio playback
+  const handlePlayAudio = () => {
+    // TODO: Implement audio playback when audio URLs are added to questions
+    toast({
+      title: "Coming Soon",
+      description: "Audio playback will be available soon!",
+    });
+  };
 
   // Handle swipe events
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
@@ -75,7 +86,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     
     setInteractionDisabled(true);
     setAnimateOut('left');
-    const correctAnswer = question.hasR;
+    const correctAnswer = question.hasL;
     setIsCorrect(correctAnswer);
     setShowFeedback(true);
     
@@ -87,14 +98,14 @@ const QuizCard: React.FC<QuizCardProps> = ({
       setSwipeDirection(null);
       setInteractionDisabled(false);
     }, 1500);
-  }, [interactionDisabled, question.hasR, onSwipeLeft]);
+  }, [interactionDisabled, question.hasL, onSwipeLeft]);
 
   const completeSwipeRight = useCallback(() => {
     if (interactionDisabled) return;
     
     setInteractionDisabled(true);
     setAnimateOut('right');
-    const correctAnswer = question.hasL;
+    const correctAnswer = question.hasR;
     setIsCorrect(correctAnswer);
     setShowFeedback(true);
     
@@ -106,7 +117,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
       setSwipeDirection(null);
       setInteractionDisabled(false);
     }, 1500);
-  }, [interactionDisabled, question.hasL, onSwipeRight]);
+  }, [interactionDisabled, question.hasR, onSwipeRight]);
 
   // Handle keyboard events - only for active card
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -175,7 +186,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
       <div 
         className={cn(
           "absolute top-6 p-3 rounded-full z-30",
-          direction === 'left' ? "left-6 bg-destructive/90" : "right-6 bg-green-500/90",
+          direction === 'left' ? "left-6 bg-blue-500/90" : "right-6 bg-destructive/90",
           "transition-opacity duration-200",
           (isDragging || animateOut) ? "opacity-100" : "opacity-0"
         )}
@@ -249,7 +260,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     <div
       ref={cardRef}
       className={cn(
-        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow p-8 select-none swipe-action",
+        "quiz-card absolute top-0 left-0 w-full bg-white rounded-xl quiz-card-shadow select-none swipe-action",
         !isActive && "pointer-events-none",
         interactionDisabled && "pointer-events-none"
       )}
@@ -266,23 +277,43 @@ const QuizCard: React.FC<QuizCardProps> = ({
       {renderFeedback()}
       {renderSwipeButtons()}
       
-      <div className="relative z-10">
+      <div className="relative z-10 p-8">
         <div className="mb-8 text-center">
           <span className="inline-block text-xs font-medium text-muted-foreground px-3 py-1 bg-secondary rounded-full mb-4">
-            Swipe left for "R" — Swipe right for "L"
+            Swipe left for "L" — Swipe right for "R"
           </span>
-          <h3 className="text-4xl font-bold tracking-tight">
-            {question.word}
-          </h3>
+          
+          {/* Image placeholder */}
+          <div className="relative w-full aspect-video mb-6 rounded-lg bg-muted overflow-hidden">
+            <img 
+              src="/placeholder.svg"
+              alt={question.word}
+              className="w-full h-full object-cover"
+            />
+          </div>
+          
+          <div className="flex items-center justify-center gap-4">
+            <h3 className="text-4xl font-bold tracking-tight">
+              {question.word}
+            </h3>
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-full"
+              onClick={handlePlayAudio}
+            >
+              <Volume2 className="h-4 w-4" />
+            </Button>
+          </div>
         </div>
         
         <div className="flex items-center justify-between mt-10 text-xs text-muted-foreground">
           <div className="flex items-center gap-2">
             <ArrowLeft size={16} />
-            <span>Has "R" sound</span>
+            <span className="text-blue-500 font-medium">Has "L" sound</span>
           </div>
           <div className="flex items-center gap-2">
-            <span>Has "L" sound</span>
+            <span className="text-destructive font-medium">Has "R" sound</span>
             <ArrowRight size={16} />
           </div>
         </div>

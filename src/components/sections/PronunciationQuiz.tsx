@@ -62,7 +62,7 @@ const PronunciationQuiz: React.FC = () => {
     : 0;
 
   return (
-    <section id="quiz" className="py-20 md:py-28 px-6 md:px-10 bg-gradient-to-b from-white to-secondary/30">
+    <div className="py-20 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-12">
           <span className="inline-block text-sm font-medium text-primary px-3 py-1 bg-primary/10 rounded-full mb-4">
@@ -72,7 +72,7 @@ const PronunciationQuiz: React.FC = () => {
             Pronunciation Quiz
           </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            Swipe left if the word has the "R" sound, and right if it has the "L" sound. Some words might have both!
+            Swipe left if the word has the "L" sound, and right if it has the "R" sound. Some words might have both!
           </p>
         </div>
         
@@ -160,7 +160,7 @@ const PronunciationQuiz: React.FC = () => {
           </p>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
