@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { ArrowLeft, ArrowRight, Check, X, Volume2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -220,7 +221,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
     
     return (
       <div className={cn(
-        "absolute inset-0 flex items-center justify-center bg-white/95 z-20 rounded-xl animate-fade-in",
+        "absolute inset-0 flex items-center justify-center bg-white/95 z-20 rounded-xl animate-fade-in transition-all duration-300",
         isCorrect ? "bg-green-50" : "bg-red-50"
       )}>
         <div className="text-center p-6">
@@ -239,7 +240,12 @@ const QuizCard: React.FC<QuizCardProps> = ({
             {isCorrect ? "Correct!" : "Not quite!"}
           </h3>
           <p className="text-sm text-muted-foreground">
-            {question.word} {question.explanation}
+            "{question.word}" {isCorrect ? "contains" : "doesn't contain"} the 
+            {swipeDirection === 'left' ? " L " : " R "}
+            sound.
+          </p>
+          <p className="text-sm text-muted-foreground mt-2">
+            {question.explanation}
           </p>
         </div>
       </div>

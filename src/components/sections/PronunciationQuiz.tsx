@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { getRandomQuestions } from '@/data/quizData';
 import QuizCard from '@/components/ui/QuizCard';
@@ -14,7 +13,6 @@ const PronunciationQuiz: React.FC = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    // Add a slight delay to ensure smooth transitions
     const timer = setTimeout(() => {
       setIsLoaded(true);
     }, 300);
@@ -29,19 +27,21 @@ const PronunciationQuiz: React.FC = () => {
   }, [currentIndex, questions.length]);
 
   const handleSwipeLeft = () => {
-    // User swiped left (claiming the word has R)
-    if (questions[currentIndex].hasR) {
-      setScore(prev => prev + 1);
-    }
-    setCurrentIndex(prev => prev + 1);
-  };
-
-  const handleSwipeRight = () => {
-    // User swiped right (claiming the word has L)
     if (questions[currentIndex].hasL) {
       setScore(prev => prev + 1);
     }
-    setCurrentIndex(prev => prev + 1);
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+    }, 1500);
+  };
+
+  const handleSwipeRight = () => {
+    if (questions[currentIndex].hasR) {
+      setScore(prev => prev + 1);
+    }
+    setTimeout(() => {
+      setCurrentIndex(prev => prev + 1);
+    }, 1500);
   };
 
   const resetQuiz = () => {
@@ -51,7 +51,6 @@ const PronunciationQuiz: React.FC = () => {
     setScore(0);
     setIsLoaded(false);
     
-    // Add a slight delay to ensure smooth transitions
     setTimeout(() => {
       setIsLoaded(true);
     }, 300);
@@ -76,7 +75,7 @@ const PronunciationQuiz: React.FC = () => {
           </p>
         </div>
         
-        <div className="h-[500px] relative flex flex-col items-center justify-center">
+        <div className="h-[600px] relative flex flex-col items-center justify-center">
           {!completed ? (
             <>
               <div 
@@ -86,11 +85,13 @@ const PronunciationQuiz: React.FC = () => {
                 )}
               >
                 <Progress value={progressPercentage} className="h-2" />
+                <div className="mt-4 text-center text-sm font-medium text-muted-foreground">
+                  Score: {score}/{currentIndex} ({questions.length} questions total)
+                </div>
               </div>
               
-              <div className="relative w-full max-w-sm h-[300px]">
+              <div className="relative w-full max-w-sm h-[400px]">
                 {questions.map((question, index) => {
-                  // Only render current card and next card (for performance)
                   if (index < currentIndex || index > currentIndex + 1) return null;
                   
                   return (
@@ -106,12 +107,16 @@ const PronunciationQuiz: React.FC = () => {
                 })}
               </div>
               
-              <div className="absolute bottom-0 w-full max-w-sm flex justify-between items-center">
-                <div className="text-sm text-muted-foreground">
-                  Question {currentIndex + 1} of {questions.length}
-                </div>
-                <div className="text-sm font-medium">
-                  Score: {score}/{currentIndex}
+              <div className="mt-8 w-full max-w-sm text-center text-sm">
+                <div className="flex justify-between items-center text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <ArrowLeft size={16} className="text-blue-500" />
+                    <span>Has "L" sound</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span>Has "R" sound</span>
+                    <ArrowRight size={16} className="text-destructive" />
+                  </div>
                 </div>
               </div>
             </>
