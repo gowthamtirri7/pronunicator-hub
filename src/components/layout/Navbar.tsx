@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Menu, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -16,6 +17,19 @@ const Navbar: React.FC = () => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Add effect to prevent body scrolling when menu is open
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -71,7 +85,8 @@ const Navbar: React.FC = () => {
           <button 
             className={cn(
               "md:hidden z-50 flex items-center",
-              isScrolled ? "text-gray-900" : "text-white"
+              isScrolled ? "text-gray-900" : "text-white",
+              isOpen ? "fixed right-6" : "relative"
             )}
             onClick={toggleMenu}
             aria-label="Toggle menu"
@@ -84,6 +99,7 @@ const Navbar: React.FC = () => {
               "fixed inset-0 bg-white flex flex-col items-center justify-center space-y-8 transition-transform duration-300 ease-in-out md:hidden",
               isOpen ? "translate-x-0" : "translate-x-full"
             )}
+            style={{ height: '100vh', width: '100vw' }}
           >
             <Link 
               to="/" 

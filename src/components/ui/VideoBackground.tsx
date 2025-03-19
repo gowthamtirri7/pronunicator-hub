@@ -58,7 +58,7 @@ const VideoBackground: React.FC<VideoBackgroundProps> = ({
       
       {/* Content */}
       {children && (
-        <div className="relative z-20">
+        <div className="relative z-20 h-full">
           {children}
         </div>
       )}
