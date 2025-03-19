@@ -63,6 +63,11 @@ const QuizCard: React.FC<QuizCardProps> = ({
   const handleTouchStart = (e: React.TouchEvent | React.MouseEvent) => {
     if (!isActive || interactionDisabled) return;
     
+    // Prevent horizontal scrolling when swiping quiz cards
+    if ('touches' in e) {
+      e.preventDefault();
+    }
+    
     setIsDragging(true);
     const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
     setStartX(clientX);
@@ -164,7 +169,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
       transform: 'translateX(0) rotate(0)',
       opacity: 1,
       transition: 'transform 0.3s ease-out, opacity 0.3s ease-out',
-      pointerEvents: isActive ? 'auto' : 'none' as const
+      pointerEvents: isActive ? 'auto' : 'none'
     };
 
     if (animateOut === 'left') {
@@ -173,7 +178,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
         transform: 'translateX(-200%) rotate(-20deg)',
         opacity: 0,
         transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
-        pointerEvents: 'none' as const
+        pointerEvents: 'none'
       };
     } else if (animateOut === 'right') {
       return {
@@ -181,7 +186,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
         transform: 'translateX(200%) rotate(20deg)',
         opacity: 0,
         transition: 'transform 0.5s ease-out, opacity 0.5s ease-out',
-        pointerEvents: 'none' as const
+        pointerEvents: 'none'
       };
     } else if (isDragging) {
       return {
@@ -270,11 +275,7 @@ const QuizCard: React.FC<QuizCardProps> = ({
       {renderFeedback()}
       
       <div className="relative z-10 p-8">
-        <div className="mb-8 text-center">
-          <span className="inline-block text-xs font-medium text-muted-foreground px-3 py-1 bg-secondary rounded-full mb-4">
-            Swipe or use arrow keys to answer
-          </span>
-          
+        <div className="mb-8 text-center">          
           <div className="relative w-full aspect-video mb-6 rounded-lg bg-muted overflow-hidden">
             <img 
               src={randomImage}
@@ -321,4 +322,3 @@ const QuizCard: React.FC<QuizCardProps> = ({
 };
 
 export default QuizCard;
-

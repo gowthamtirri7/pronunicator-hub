@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -89,9 +90,15 @@
     @apply border-border;
   }
 
+  html, body {
+    @apply overflow-x-hidden;
+    overscroll-behavior-x: none;
+  }
+
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    touch-action: pan-y;
   }
   
   .bg-blur {
@@ -152,6 +159,7 @@
     will-change: transform;
     transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.3s ease;
     backface-visibility: hidden;
+    touch-action: pan-y;
   }
   
   .quiz-card-shadow {
