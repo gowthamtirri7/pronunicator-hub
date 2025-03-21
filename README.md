@@ -23,19 +23,6 @@ You need to have the following installed on your machine:
 - [Node.js](https://nodejs.org/) (v16 or later)
 - npm (comes with Node.js)
 
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone <your-repo-url>
-   cd <project-directory>
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-
 ### Running Locally
 
 1. Start the development server:
@@ -165,15 +152,3 @@ src/
 ## Deployment
 
 This application can be deployed on any static hosting service that supports React applications.
-
-When building for production:
-
-1. Run `npm run build`
-2. The output will be in the `dist` directory
-3. Upload the contents of the `dist` directory to your hosting provider
-
-Popular hosting options include:
-- [Netlify](https://netlify.com)
-- [Vercel](https://vercel.com)
-- [GitHub Pages](https://pages.github.com)
-- [Firebase Hosting](https://firebase.google.com/docs/hosting)
