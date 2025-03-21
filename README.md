@@ -1,69 +1,179 @@
-# Welcome to your Lovable project
 
-## Project info
+# English Pronunciation Quiz Application
 
-**URL**: https://lovable.dev/projects/15ba61df-6f26-484a-b864-fde17e7ebf2a
+A web application designed to help users practice English pronunciation by distinguishing between 'L' and 'R' sounds through an interactive swipe-based quiz.
 
-## How can I edit this code?
+## Table of Contents
+- [Getting Started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running Locally](#running-locally)
+- [Editing Content](#editing-content)
+  - [Customizing Quiz Questions](#customizing-quiz-questions)
+  - [Changing Images](#changing-images)
+  - [Modifying Text Content](#modifying-text-content)
+- [Project Structure](#project-structure)
+- [Deployment](#deployment)
 
-There are several ways of editing your application.
+## Getting Started
 
-**Use Lovable**
+### Prerequisites
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/15ba61df-6f26-484a-b864-fde17e7ebf2a) and start prompting.
+You need to have the following installed on your machine:
+- [Node.js](https://nodejs.org/) (v16 or later)
+- npm (comes with Node.js)
 
-Changes made via Lovable will be committed automatically to this repo.
+### Installation
 
-**Use your preferred IDE**
+1. Clone the repository:
+   ```bash
+   git clone <your-repo-url>
+   cd <project-directory>
+   ```
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Running Locally
 
-Follow these steps:
+1. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+2. Open your browser and navigate to:
+   ```
+   http://localhost:8080
+   ```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+3. To build for production:
+   ```bash
+   npm run build
+   ```
 
-# Step 3: Install the necessary dependencies.
-npm i
+4. To preview the production build:
+   ```bash
+   npm run preview
+   ```
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+## Editing Content
+
+### Customizing Quiz Questions
+
+The quiz questions are stored in `src/data/quizData.ts`. Each question has the following structure:
+
+```typescript
+{
+  id: number,        // Unique identifier for the question
+  word: string,      // The word to be tested
+  hasL: boolean,     // Whether the word contains the 'L' sound
+  hasR: boolean,     // Whether the word contains the 'R' sound
+  explanation: string // Explanation of the pronunciation
+}
 ```
 
-**Edit a file directly in GitHub**
+To edit or add questions:
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+1. Open `src/data/quizData.ts`
+2. Modify the existing questions or add new ones following the same structure
+3. Ensure each question has a unique ID
+4. Save the file and the changes will be applied automatically when the app is running in development mode
 
-**Use GitHub Codespaces**
+Example of adding a new question:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+```typescript
+{
+  id: 51, // Make sure this is a unique ID
+  word: "Lovely",
+  hasL: true,
+  hasR: false,
+  explanation: "Lovely has the L sound. The tongue touches the ridge behind your upper teeth for the 'l' sound."
+}
+```
 
-## What technologies are used for this project?
+### Changing Images
 
-This project is built with .
+#### Quiz Card Images
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+Quiz card images are randomly selected from a predefined list in `src/components/ui/QuizCard.tsx`. To change these:
 
-## How can I deploy this project?
+1. Open `src/components/ui/QuizCard.tsx`
+2. Find the `placeholderImages` array at the top of the file
+3. Replace the image IDs with your own Unsplash IDs or use a different image service
+4. Save the file
 
-Simply open [Lovable](https://lovable.dev/projects/15ba61df-6f26-484a-b864-fde17e7ebf2a) and click on Share -> Publish.
+```typescript
+const placeholderImages = [
+  'your-new-unsplash-id-1',
+  'your-new-unsplash-id-2',
+  // Add more as needed
+];
+```
 
-## I want to use a custom domain - is that possible?
+#### Hero Section Video
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+To change the background video in the hero section:
+
+1. Add your new video file to the `public` directory
+2. Open `src/components/sections/HeroSection.tsx`
+3. Update the `videoSrc` prop in the `VideoBackground` component
+
+### Modifying Text Content
+
+#### Home Page Content
+
+To edit the text on the home page:
+
+1. Navigate to `src/pages/Index.tsx` and the component files in `src/components/sections/`
+2. Edit the text content within these files
+3. Save changes
+
+Important section files:
+- `src/components/sections/HeroSection.tsx` - Hero banner content
+- `src/components/sections/AboutSection.tsx` - About section content
+- `src/components/sections/BookSection.tsx` - Book recommendation section
+- `src/components/sections/EmailSignup.tsx` - Email signup form
+
+#### Quiz Page
+
+To modify quiz instructions and text:
+
+1. Open `src/components/sections/PronunciationQuiz.tsx`
+2. Edit the text in the JSX elements
+3. For customizing feedback messages, modify the feedback logic in both `PronunciationQuiz.tsx` and `QuizCard.tsx`
+
+## Project Structure
+
+```
+src/
+├── components/         # UI components
+│   ├── layout/         # Layout components (Navbar, Footer)
+│   ├── sections/       # Page sections (HeroSection, PronunciationQuiz)
+│   └── ui/             # UI elements (buttons, cards, etc.)
+├── data/               # Data files including quiz questions
+├── hooks/              # Custom React hooks
+├── lib/                # Utility functions
+├── pages/              # Page components
+│   ├── Index.tsx       # Home page
+│   ├── Quiz.tsx        # Quiz page
+│   └── NotFound.tsx    # 404 page
+└── App.tsx             # Main application component with routing
+```
+
+## Deployment
+
+This application can be deployed on any static hosting service that supports React applications.
+
+When building for production:
+
+1. Run `npm run build`
+2. The output will be in the `dist` directory
+3. Upload the contents of the `dist` directory to your hosting provider
+
+Popular hosting options include:
+- [Netlify](https://netlify.com)
+- [Vercel](https://vercel.com)
+- [GitHub Pages](https://pages.github.com)
+- [Firebase Hosting](https://firebase.google.com/docs/hosting)
